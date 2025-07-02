@@ -77,5 +77,5 @@ async def webhook(request: Request):
 
 # 🏁 Run the bot with webhook
 
-x = bot.set_webhook(url="https://tetherswap-api.vercel.app/")
+x = bot.set_webhook(url="https://tetherswap-api.onrender.com")
 print(f"Webhook set: {x}")
