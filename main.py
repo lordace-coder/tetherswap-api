@@ -1,18 +1,31 @@
 import telebot
 import os, dotenv
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from client import get_referrals, add_referral  
+from fastapi import FastAPI, Request
+import uvicorn
 
 dotenv.load_dotenv()
 bot = telebot.TeleBot(os.getenv("TELEGRAM_BOT", ""))
 
+app = FastAPI()
+
 name = os.getenv("NAME", "TetherSwapBot")
-url = os.getenv("URL", "https://x-payee.com")
+url = os.getenv("URL", "")
 username = os.getenv("TELEGRAM_USERNAME")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")  # Set this in your .env
 
 
 # 🔥 Start command
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
+    # Check for referral in /start command
+    args = message.text.split()
+    if len(args) > 1:
+        ref_by = args[1]
+        user_id = str(message.from_user.id)
+        if ref_by != user_id:  # Prevent self-referral
+            add_referral(user_id, ref_by)
     text = (
         f"👋 Hey there, welcome to *{name}*! 🚀\n\n"
         "This is your trusted Telegram bot for swapping *Pi Network tokens ↔ USDT* 💱.\n"
@@ -40,15 +53,30 @@ def handle_callbacks(call):
         bot.send_message(call.message.chat.id, f"🔗 Your referral link:\n{ref_link}")
 
     elif call.data == "check_ref":
-        # Dummy reply — you'd replace this with real logic tied to a database
+        # Connect to backend to get real referral count
+        user_id = str(call.from_user.id)
+        count = get_referrals(user_id)
         bot.answer_callback_query(call.id)
         bot.send_message(
             call.message.chat.id,
-            "👥 You have *3* successful referrals. Keep it up! 💪",
+            f"👥 You have *{count}* successful referrals. Keep it up! 💪",
             parse_mode="Markdown",
         )
 
 
-# 🏁 Run the bot with polling
+@app.post("/")
+async def webhook(request: Request):
+    if request.headers.get('content-type') == 'application/json':
+        json_string = await request.body()
+        update = telebot.types.Update.de_json(json_string.decode('utf-8'))
+        bot.process_new_updates([update])
+        return ""
+    else:
+        return "", 403
+
+
+# 🏁 Run the bot with webhook
 if __name__ == "__main__":
-    bot.infinity_polling()
+    bot.remove_webhook()
+    bot.set_webhook(url=WEBHOOK_URL)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
