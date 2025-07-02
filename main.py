@@ -76,7 +76,7 @@ async def webhook(request: Request):
 
 
 # 🏁 Run the bot with webhook
-if __name__ == "__main__":
-    bot.remove_webhook()
-    bot.set_webhook(url=WEBHOOK_URL)
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+bot.remove_webhook()
+x = bot.set_webhook(url="https://tetherswap-api.vercel.app/")
+print(f"Webhook set: {x}")
