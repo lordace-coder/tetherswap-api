@@ -38,7 +38,7 @@ def send_welcome(message):
         InlineKeyboardButton("👥 Check Referrals", callback_data="check_ref"),
         InlineKeyboardButton(
             "💱 TetherSwap",
-            web_app=WebAppInfo(url=url),
+            web_app=WebAppInfo(url=url+"?userid="+str(message.from_user.id),
         ),
     )
     bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
@@ -78,4 +78,3 @@ async def webhook(request: Request):
 # 🏁 Run the bot with webhook
 
 x = bot.set_webhook(url="https://tetherswap-api.onrender.com")
-print(f"Webhook set: {x}")

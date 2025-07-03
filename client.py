@@ -13,7 +13,7 @@ def get_referrals(user_id):
     try:
         # Assuming 'referrals' is the collection name and 'user_id' is the field to filter by
         result = db.list_documents(
-            "referrals",
+            "referrals",query = QueryBuilder().from_dict({"ref_by": user_id})
         )
         if not result:
             return 0
