@@ -13,7 +13,6 @@ app = FastAPI()
 name = os.getenv("NAME", "TetherSwapBot")
 url = os.getenv("URL", "")
 username = os.getenv("TELEGRAM_USERNAME")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")  # Set this in your .env
 
 
 # 🔥 Start command
@@ -33,12 +32,13 @@ def send_welcome(message):
         "What would you like to do?"
     )
     markup = InlineKeyboardMarkup(row_width=2)
+    print(url + "?userid=" + str(message.from_user.id))
     markup.add(
         InlineKeyboardButton("🔗 Get Referral Link", callback_data="get_ref"),
         InlineKeyboardButton("👥 Check Referrals", callback_data="check_ref"),
         InlineKeyboardButton(
             "💱 TetherSwap",
-            web_app=WebAppInfo(url=url+"?userid="+str(message.from_user.id),
+            web_app=WebAppInfo(url=url + "?userid=" + str(message.from_user.id)),
         ),
     )
     bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
