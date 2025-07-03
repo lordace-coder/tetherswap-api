@@ -1,7 +1,7 @@
 import telebot
 import os, dotenv
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-from client import get_referrals, add_referral  
+from client import get_referrals, add_referral
 from fastapi import FastAPI, Request
 import uvicorn
 
@@ -40,6 +40,10 @@ def send_welcome(message):
             "💱 TetherSwap",
             web_app=WebAppInfo(url=url + "?userid=" + str(message.from_user.id)),
         ),
+        InlineKeyboardButton(
+            "💱Swap For Telegram X users",
+            url=url + "?userid=" + str(message.from_user.id),
+        ),
     )
     bot.send_message(message.chat.id, text, reply_markup=markup, parse_mode="Markdown")
 
@@ -66,9 +70,9 @@ def handle_callbacks(call):
 
 @app.post("/")
 async def webhook(request: Request):
-    if request.headers.get('content-type') == 'application/json':
+    if request.headers.get("content-type") == "application/json":
         json_string = await request.body()
-        update = telebot.types.Update.de_json(json_string.decode('utf-8'))
+        update = telebot.types.Update.de_json(json_string.decode("utf-8"))
         bot.process_new_updates([update])
         return ""
     else:
